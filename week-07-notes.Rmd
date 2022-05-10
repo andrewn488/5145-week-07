@@ -1,0 +1,208 @@
+---
+title: "Week-07-Notes"
+author: "Andrew Nalundasan"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    number_sections: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Overview Video
+
++ Last week for SQL
++ Chapters 15, 16, 17
++ DTC
+
+    + Due June 7th midnight - 300 points
+    + AdventureWorksDW2017
+        + Database Diagram
+    + Technical DOcument
+        + Similar to what we've been doing with the book
+        + Statement of the problem
+        + **Provide a narrative of your approach and conclusions**
+        + Include queries and results
+
+# 07-01: Modifying Data
+
++ Chapter 15
++ Add additional records
++ Update information in a DB
++ Delete stuff
+
+## Modifying data overview
+
+Changing Data
+Copy a database
+
++ Running what-if scenarios
+    
+    + What if instead of using 5 suppliers, we use the top 3 suppliers and apply the budget for the dropped 2 suppliers into the top 3 and see how our margins change if we just use top 3.
+
++ Creating special analytic database
+
+    + Contains subset of data to run analytics without having to crunch entire dataset 
+    
++ Gathering data from multiple sources in one location
+
+    + Insert data from different databases
+    
++ Fixing data
+
+    + Fix typos and things like that
+    
++ Uses
+
+    1. Examine sales data from a small company we plan to buy. Determine if the sales volumes, expenses, and revenue all balance properly. 
+    2. Combine log data from 20 different manufacturing machines to look for anomalies AND create forecasts based on a 10% growth in demand.
+    3. Delete all historical data (older than 24 months) related to customers based in Europe. Get rid of historical data or irrelevant data because it's skewing our analysis
+
+## Copy a database
+
++ Copying a DB methods
+
+    1. Backup / Restore
+        + Secure, but requires admin rights
+    2. Copy DB wizard
+        + Easiest, but requires special agents
+    3. Import / Export
+        + Secure for moving between servers
+    4. Generate scripts
+        + Slow and not secure
+        
+
+# 07-02: Chp 15 UPDATE
+
++ Different syntax than SELECT
+
+## UPDATE overview
+
++ Syntax: 
+    
+    **UPDATE** table_name 
+    **SET** column_name = *value expression*
+    **WHERE** *search condition*
+    
++ Compared to SELECT
+
+    SELECT CUstomerID, OrderDate, Discount
+    FROM Orders AS o
+    WHERE CustomerID = 1002;
+    
+    UPDATE Orders
+    SET Discount = Discount = 0.05
+    WHERE CustomerID = 1002;
+    
++ Rules
+
+    + Update clause
+        + must be a real table name (not virtual table or aliases)
+        + can contain an INNER JOIN for WHERE filtering purposes
+    + SET clause
+        + must reference actual columns (not aliases)
+        + Can contain subqueries
+        
++ RECOMMENDATION
+
+    + Create a SELECT query first
+    + Make sure your are only referencing the desired rows
+    + Then convert SELECT query to UPDATE
+    + **Remember: UPDATE is permanent!**
+        + learn how to do backups and restores
+        + make certain updating the correct data
+    
+
+## Examples
+
++ Replace Alpha with H-Base in suppliers
+
+    UPDATE Suppliers
+    SET supplier_id = 150,
+      supplier_name = 'H-Base Services'
+    WHERE supplier_name = 'Alpha Services'
+
++ Set a default value for a new column (bracket)
+
+    UPDATE Student
+    SET Bracket = IIF(Age > 24, 2, 1)
+    
++ Update the color for a product
+
+    UPDATE Production.Product
+    SET Color = N'Metallic Red'
+    WHERE 
+      Name LIKE N'Road-250%' AND
+      Color = N'Red';
+
++ Update current_category column before analysis
+
+    UPDATE summary_data
+    
+    SET current_category = 
+      (SELECT category_id
+      FROM products AS p
+      WHERE p.product_id = summary_data.product_id)
+      
+    WHERE EXISTS
+      (SELECT category_id
+      FROM products AS pw
+      WHERE pw.product_id = summary_data.product_id);
+      
++ Update YTD Sales for each Sales Person
+
+    UPDATE SalesPerson
+    SET SalesYTD = 
+      (SELECT SUM(sh.Total)
+      FROM SalesOrderHeader AS sh
+      WHERE SalesPerson.BusinessEntityID = sh.SalesPersonID  -- where the sales person is the sales person
+      GROUP BY sh.SalesPersonID);
+
++ Update YTD Sales for each Sales Person into US currency
+
+    UPDATE SalesPerson
+    SET SalesYTDUSCurrency = 
+      (SELECT SUM(sh.Total * c.ExchangeRate)
+      FROM SalesOrderHeader AS sh
+      INNER JOIN Currency AS c
+        ON sh.countryid = c.countryid
+      WHERE SalesPerson.BusinessENtityID = sh.SalesPersonID
+      GROUP BY sh.SalesPersonID);
+
+## Hands on
+
++ practice in AdventureWorks2012
++ Assignment - do all problems for Chapter 15
+
+# 07-03: Chp 16 INSERT
+
+## INSERT Overview
+
+## Insert rules
+
+## Examples
+
+## Hands on
+
++ practice in AdventureWorks2012
++ Assignment - do all problems for Chapter 16
+
+# 07-04: Chp 17 DELETE
+
++ practice in AdventureWorks2012
++ Assignment - do all problems for Chapter 17
+
+## DELETE Overview
+
+## DELETE Examples
+
+# 07-05: VIEWs & Stored Procedures
+
+## VIEWs
+
+## Programmability
